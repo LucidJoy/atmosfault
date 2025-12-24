@@ -10,7 +10,8 @@ import { BadgeInfo, House, Truck } from "lucide-react";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { VideoText } from "@/components/ui/video-text";
 import { DottedMap } from "@/components/ui/dotted-map";
-import { Highlighter } from "@/components/ui/highlighter";
+import { TextAnimate } from "@/components/ui/text-animate";
+import { SpinningText } from "@/components/ui/spinning-text";
 
 const links = [
   {
@@ -52,6 +53,12 @@ export default function Home() {
         {/* Dotted Map Background */}
         <div className="absolute inset-0 -z-10 h-screen w-screen opacity-30 ">
           <DottedMap dotRadius={0.1} />
+        </div>
+
+        <div className="absolute bottom-125 right-8 w-32 h-32">
+          <SpinningText className="text-slate-400 text-xs">
+            atmos fault • atmos fault • atmos fault •
+          </SpinningText>
         </div>
 
         <SmoothCursor />
@@ -138,6 +145,7 @@ export default function Home() {
                       x="0%"
                       y="50%"
                       className="h-24 md:h-32 lg:h-44 w-full"
+                      preload="metadata"
                     >
                       LAND
                     </VideoText>
@@ -164,6 +172,7 @@ export default function Home() {
                       x="0%"
                       y="50%"
                       className="h-24 md:h-32 lg:h-44 w-full"
+                      preload="metadata"
                     >
                       AIR
                     </VideoText>
@@ -190,19 +199,64 @@ export default function Home() {
                       x="0%"
                       y="50%"
                       className="h-24 md:h-32 lg:h-44 w-full"
+                      preload="metadata"
                     >
                       OCEAN
                     </VideoText>
                   </motion.div>
 
-                  <div className="text-base text-slate-600 max-w-lg mx-auto leading-relaxed pt-4">
+                  <TextAnimate
+                    variants={{
+                      hidden: {
+                        opacity: 0,
+                        y: 30,
+                        rotate: 45,
+                        scale: 0.5,
+                      },
+                      show: (i) => ({
+                        opacity: 1,
+                        y: 0,
+                        rotate: 0,
+                        scale: 1,
+                        transition: {
+                          delay: i * 0.1,
+                          duration: 0.4,
+                          y: {
+                            type: "spring",
+                            damping: 12,
+                            stiffness: 200,
+                            mass: 0.8,
+                          },
+                          rotate: {
+                            type: "spring",
+                            damping: 8,
+                            stiffness: 150,
+                          },
+                          scale: {
+                            type: "spring",
+                            damping: 10,
+                            stiffness: 300,
+                          },
+                        },
+                      }),
+                      exit: (i) => ({
+                        opacity: 0,
+                        y: 30,
+                        rotate: 45,
+                        scale: 0.5,
+                        transition: {
+                          delay: i * 0.1,
+                          duration: 0.4,
+                        },
+                      }),
+                    }}
+                    by="character"
+                    className="text-base text-slate-600 max-w-lg mx-auto leading-relaxed pt-4"
+                  >
                     Your package travels through all three realms of Earth.
-                    Watch it traverse{" "}
-                    <Highlighter action="highlight" color="#FF9800">
-                      land
-                    </Highlighter>
-                    , soar through air, and drift across ocean in real-time.
-                  </div>
+                    Watch it travel land, soar through air, and drift across
+                    ocean in real-time.
+                  </TextAnimate>
                 </div>
               </div>
 
@@ -220,27 +274,11 @@ export default function Home() {
                     value={trackingNumber}
                     onChange={(e) => setTrackingNumber(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-                    className="h-14 text-base bg-white/80 backdrop-blur-sm border-slate-200 focus:border-slate-400 text-slate-800 placeholder:text-slate-400 shadow-sm rounded-xl transition-all"
+                    className="h-14 text-base bg-white/80 backdrop-blur-sm border-slate-200 focus:border-slate-400 text-slate-800 placeholder:text-slate-400 shadow-sm rounded-xl transition-all cursor-none"
                   />
                 </div>
-                <Button
-                  onClick={handleTrack}
-                  className="w-full h-14 text-base bg-gradient-to-r from-slate-900 to-slate-700 hover:from-slate-800 hover:to-slate-600 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl font-medium"
-                >
+                <Button onClick={handleTrack} className="cursor-none">
                   Track on Map
-                  <svg
-                    className="w-5 h-5 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
-                    />
-                  </svg>
                 </Button>
 
                 {/* Sample Numbers */}
@@ -248,7 +286,7 @@ export default function Home() {
                   <p className="text-slate-500 text-xs mb-3 font-medium">
                     Try sample balloons:
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 justify-around">
                     {["ATM-00000000", "ATM-10000029", "ATM-23000100"].map(
                       (num) => (
                         <button
@@ -257,7 +295,7 @@ export default function Home() {
                             setTrackingNumber(num);
                             router.push(`/map?tracking=${num}`);
                           }}
-                          className="px-3 py-2 bg-white/60 hover:bg-white border border-slate-200 rounded-lg text-slate-600 text-xs transition-all duration-200 hover:border-slate-300 hover:shadow-sm font-mono"
+                          className="px-3 py-2 bg-white/60 hover:bg-white border border-slate-200 rounded-lg text-slate-600 text-xs transition-all duration-200 hover:border-slate-300 hover:shadow-sm font-mono cursor-none"
                         >
                           {num}
                         </button>
@@ -281,10 +319,57 @@ export default function Home() {
               <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
                 Why AtmosFault?
               </h2>
-              <p className="text-slate-600 max-w-2xl mx-auto">
+              <TextAnimate
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                    y: 30,
+                    rotate: 45,
+                    scale: 0.5,
+                  },
+                  show: (i) => ({
+                    opacity: 1,
+                    y: 0,
+                    rotate: 0,
+                    scale: 1,
+                    transition: {
+                      delay: i * 0.1,
+                      duration: 0.4,
+                      y: {
+                        type: "spring",
+                        damping: 12,
+                        stiffness: 200,
+                        mass: 0.8,
+                      },
+                      rotate: {
+                        type: "spring",
+                        damping: 8,
+                        stiffness: 150,
+                      },
+                      scale: {
+                        type: "spring",
+                        damping: 10,
+                        stiffness: 300,
+                      },
+                    },
+                  }),
+                  exit: (i) => ({
+                    opacity: 0,
+                    y: 30,
+                    rotate: 45,
+                    scale: 0.5,
+                    transition: {
+                      delay: i * 0.1,
+                      duration: 0.4,
+                    },
+                  }),
+                }}
+                by="character"
+                className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed pt-4"
+              >
                 The most advanced platform for monitoring atmospheric balloon
                 missions
-              </p>
+              </TextAnimate>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -42,7 +42,7 @@ const FloatingDockMobile = ({
         {open && (
           <motion.div
             layoutId="nav"
-            className="absolute inset-x-0 bottom-full mb-2 flex flex-col gap-2"
+            className="absolute inset-x-0 bottom-full mb-2 flex flex-col gap-2 cursor-none"
           >
             {items.map((item, idx) => (
               <motion.div
@@ -75,7 +75,7 @@ const FloatingDockMobile = ({
       </AnimatePresence>
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg dark:bg-neutral-800/80 dark:border-neutral-700/50"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg dark:bg-neutral-800/80 dark:border-neutral-700/50 cursor-none"
       >
         <IconLayoutNavbarCollapse className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
       </button>
@@ -96,7 +96,7 @@ const FloatingDockDesktop = ({
       onMouseMove={(e) => mouseY.set(e.pageY)}
       onMouseLeave={() => mouseY.set(Infinity)}
       className={cn(
-        "hidden w-16 flex-col items-center gap-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg py-4 px-3 md:flex dark:bg-neutral-900/80 dark:border-neutral-700/50",
+        "hidden w-16 flex-col items-center gap-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-lg py-4 px-3 md:flex dark:bg-neutral-900/80 dark:border-neutral-700/50 cursor-none",
         className
       )}
     >
@@ -167,7 +167,7 @@ function IconContainer({
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-slate-100/60 backdrop-blur-sm border border-slate-200/30 dark:bg-neutral-800/60 dark:border-neutral-700/30"
+        className="relative flex aspect-square items-center justify-center rounded-full bg-slate-100/60 backdrop-blur-sm border border-slate-200/30 dark:bg-neutral-800/60 dark:border-neutral-700/30 cursor-none"
       >
         <AnimatePresence>
           {hovered && (
@@ -175,7 +175,7 @@ function IconContainer({
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 2 }}
-              className="absolute left-full ml-2 top-1/2 -translate-y-1/2 w-fit rounded-md border border-slate-200/50 bg-white/90 backdrop-blur-md shadow-lg px-2 py-0.5 text-xs whitespace-pre text-slate-700 dark:border-neutral-700/50 dark:bg-neutral-800/90 dark:text-white"
+              className="absolute left-full ml-2 top-1/2 -translate-y-1/2 w-fit rounded-md border border-slate-200/50 bg-white/90 backdrop-blur-md shadow-lg px-2 py-0.5 text-xs whitespace-pre text-slate-700 dark:border-neutral-700/50 dark:bg-neutral-800/90 dark:text-white cursor-none"
             >
               {title}
             </motion.div>
@@ -183,7 +183,7 @@ function IconContainer({
         </AnimatePresence>
         <motion.div
           style={{ width: widthIcon, height: heightIcon }}
-          className="flex items-center justify-center"
+          className="flex items-center justify-center cursor-none"
         >
           {icon}
         </motion.div>
