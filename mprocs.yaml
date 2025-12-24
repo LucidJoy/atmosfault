@@ -1,0 +1,6 @@
+procs:
+  next:
+    cmd: ["npm", "run", "dev"]
+
+  drizzle:
+    cmd: ["npx", "drizzle-kit", "studio"]
