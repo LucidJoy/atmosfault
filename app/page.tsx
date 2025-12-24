@@ -49,16 +49,16 @@ export default function Home() {
 
   return (
     <>
+      <div className="fixed -bottom-7 right-8 w-32 h-32 z-50">
+        <SpinningText className="text-slate-400 text-xs">
+          atmos fault • atmos fault • atmos fault •
+        </SpinningText>
+      </div>
+
       <div className="min-h-screen relative overflow-hidden">
         {/* Dotted Map Background */}
         <div className="absolute inset-0 -z-10 h-screen w-screen opacity-30 ">
           <DottedMap dotRadius={0.1} />
-        </div>
-
-        <div className="absolute bottom-125 right-8 w-32 h-32">
-          <SpinningText className="text-slate-400 text-xs">
-            atmos fault • atmos fault • atmos fault •
-          </SpinningText>
         </div>
 
         <SmoothCursor />
@@ -263,7 +263,7 @@ export default function Home() {
               {/* Tracking Input */}
               <motion.div
                 id="track"
-                className="space-y-4 max-w-md mx-auto"
+                className="space-y-4 max-w-md mx-auto relative"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
@@ -277,6 +277,7 @@ export default function Home() {
                     className="h-14 text-base bg-white/80 backdrop-blur-sm border-slate-200 focus:border-slate-400 text-slate-800 placeholder:text-slate-400 shadow-sm rounded-xl transition-all cursor-none"
                   />
                 </div>
+
                 <Button onClick={handleTrack} className="cursor-none">
                   Track on Map
                 </Button>
