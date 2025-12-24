@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Map, { Marker, Source, Layer } from "react-map-gl/mapbox";
 import type { MapRef } from "react-map-gl/mapbox";
@@ -40,7 +40,7 @@ const getStatusColor = (status: string): string => {
   }
 };
 
-export default function MapPage() {
+function MapPageContent() {
   const searchParams = useSearchParams();
   const mapRef = useRef<MapRef>(null);
   const [trackingNumber, setTrackingNumber] = useState(
@@ -496,5 +496,20 @@ export default function MapPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function MapPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen flex items-center justify-center bg-slate-950">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-white text-lg">Loading map...</p>
+        </div>
+      </div>
+    }>
+      <MapPageContent />
+    </Suspense>
   );
 }
