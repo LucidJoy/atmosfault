@@ -5,6 +5,18 @@
 
 import type { BlameChain } from '../services/blame-engine';
 
+export interface WeatherData {
+  temperature: number; // Celsius
+  feelsLike: number;
+  pressure: number; // hPa
+  humidity: number; // %
+  windSpeed: number; // m/s
+  windDirection: number; // degrees
+  description: string; // e.g., "clear sky"
+  icon: string; // weather icon code
+  clouds: number; // % cloud coverage
+}
+
 export type PackageStatus = "pending" | "in_transit" | "delivered" | "failed" | "on_hold";
 
 export interface Location {
@@ -48,6 +60,8 @@ export interface TrackingResponse {
   metadata: PackageMetadata;
   // AtmosFault blame data
   blame?: BlameChain;
+  // Weather at current package location
+  weather?: WeatherData;
 }
 
 export interface TrackingError {

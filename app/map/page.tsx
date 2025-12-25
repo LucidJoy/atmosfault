@@ -24,6 +24,7 @@ import {
   RotateCw,
 } from "lucide-react";
 import { AtmosProvider, useAtmos } from "@/context/AtmosContext";
+import { getWeatherEmoji } from "@/lib/services/weather";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { toast } from "sonner";
 
@@ -458,6 +459,61 @@ function MapPageContent() {
                         </span>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Weather Section */}
+              {trackingData.weather && (
+                <div
+                  className="space-y-3 animate-fadeIn"
+                  style={{ animationDelay: "175ms" }}
+                >
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <Wind className="w-4 h-4" />
+                    <h3 className="text-sm font-semibold">Current Weather</h3>
+                  </div>
+                  <div className="bg-gradient-to-br from-sky-50 to-cyan-50 border border-cyan-200 rounded-lg p-4 space-y-3 hover:from-sky-100 hover:to-cyan-100 transition-all">
+                    <div className="flex items-center justify-between">
+                      <span className="text-3xl">{getWeatherEmoji(trackingData.weather.icon)}</span>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-slate-800">
+                          {trackingData.weather.temperature.toFixed(1)}°C
+                        </p>
+                        <p className="text-xs text-slate-600 capitalize">
+                          Feels like {trackingData.weather.feelsLike.toFixed(1)}°C
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-sm text-slate-700 capitalize border-t border-cyan-200 pt-3">
+                      <p className="font-medium">{trackingData.weather.description}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-white/50 rounded px-2 py-1.5">
+                        <span className="text-slate-600">Humidity</span>
+                        <p className="font-semibold text-slate-800">
+                          {trackingData.weather.humidity}%
+                        </p>
+                      </div>
+                      <div className="bg-white/50 rounded px-2 py-1.5">
+                        <span className="text-slate-600">Clouds</span>
+                        <p className="font-semibold text-slate-800">
+                          {trackingData.weather.clouds}%
+                        </p>
+                      </div>
+                      <div className="bg-white/50 rounded px-2 py-1.5">
+                        <span className="text-slate-600">Pressure</span>
+                        <p className="font-semibold text-slate-800">
+                          {trackingData.weather.pressure} hPa
+                        </p>
+                      </div>
+                      <div className="bg-white/50 rounded px-2 py-1.5">
+                        <span className="text-slate-600">Wind</span>
+                        <p className="font-semibold text-slate-800">
+                          {trackingData.weather.windSpeed.toFixed(1)} m/s
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
