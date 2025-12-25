@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion } from "framer-motion";
-import { BadgeInfo, House, Truck } from "lucide-react";
+import {
+  BadgeInfo,
+  FilePenLine,
+  FolderHeart,
+  House,
+  Linkedin,
+  RotateCcw,
+  RotateCw,
+  Truck,
+} from "lucide-react";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { VideoText } from "@/components/ui/video-text";
 import { DottedMap } from "@/components/ui/dotted-map";
 import { TextAnimate } from "@/components/ui/text-animate";
 import { SpinningText } from "@/components/ui/spinning-text";
+import { useAtmos } from "@/context/AtmosContext";
+import { toast } from "sonner";
 
 const links = [
   {
@@ -27,25 +38,234 @@ const links = [
     icon: (
       <Truck className="h-full w-full text-neutral-500 dark:text-neutral-300" />
     ),
-    href: "#",
+    href: "/map",
   },
   {
     title: "About",
     icon: (
       <BadgeInfo className="h-full w-full text-neutral-500 dark:text-neutral-300" />
     ),
-    href: "#",
+    href: "/about",
+  },
+  {
+    title: "Portfolio",
+    icon: (
+      <FolderHeart className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+    ),
+    href: "https://lucidjoy.vercel.app/",
+  },
+  // {
+  //   title: "Resume",
+  //   icon: (
+  //     <FilePenLine className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+  //   ),
+  //   href: "https://drive.google.com/file/d/1v6y4h-x0-5pSba4iXBv6ak1mohCixNcM/view?usp=sharing",
+  // },
+  {
+    title: "LinkedIn",
+    icon: (
+      <Linkedin className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+    ),
+    href: "https://www.linkedin.com/in/lucidjoy/",
   },
 ];
 
-export default function Home() {
+const textVariants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    rotate: 45,
+    scale: 0.5,
+  },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    scale: 1,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+      y: {
+        type: "spring",
+        damping: 12,
+        stiffness: 200,
+        mass: 0.8,
+      },
+      rotate: {
+        type: "spring",
+        damping: 8,
+        stiffness: 150,
+      },
+      scale: {
+        type: "spring",
+        damping: 10,
+        stiffness: 300,
+      },
+    },
+  }),
+  exit: (i: number) => ({
+    opacity: 0,
+    y: 30,
+    rotate: 45,
+    scale: 0.5,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.4,
+    },
+  }),
+};
+
+const markers = [
+  {
+    lat: 40.7128,
+    lng: -74.006,
+    size: 0.3,
+  }, // New York
+  {
+    lat: 34.0522,
+    lng: -118.2437,
+    size: 0.3,
+  }, // Los Angeles
+  {
+    lat: 51.5074,
+    lng: -0.1278,
+    size: 0.3,
+  }, // London
+  {
+    lat: -33.8688,
+    lng: 151.2093,
+    size: 0.3,
+  }, // Sydney
+  {
+    lat: 48.8566,
+    lng: 2.3522,
+    size: 0.3,
+  }, // Paris
+  {
+    lat: 35.6762,
+    lng: 139.6503,
+    size: 0.3,
+  }, // Tokyo
+  {
+    lat: 55.7558,
+    lng: 37.6176,
+    size: 0.3,
+  }, // Moscow
+  {
+    lat: 39.9042,
+    lng: 116.4074,
+    size: 0.3,
+  }, // Beijing
+  {
+    lat: 28.6139,
+    lng: 77.209,
+    size: 0.3,
+  }, // New Delhi
+  {
+    lat: -23.5505,
+    lng: -46.6333,
+    size: 0.3,
+  }, // São Paulo
+  {
+    lat: 1.3521,
+    lng: 103.8198,
+    size: 0.3,
+  }, // Singapore
+  {
+    lat: 25.2048,
+    lng: 55.2708,
+    size: 0.3,
+  }, // Dubai
+  {
+    lat: 52.52,
+    lng: 13.405,
+    size: 0.3,
+  }, // Berlin
+  {
+    lat: 19.4326,
+    lng: -99.1332,
+    size: 0.3,
+  }, // Mexico City
+  {
+    lat: -26.2041,
+    lng: 28.0473,
+    size: 0.3,
+  }, // Johannesburg
+];
+
+function TrackingInput() {
   const [trackingNumber, setTrackingNumber] = useState("");
+
   const router = useRouter();
 
   const handleTrack = () => {
     if (!trackingNumber) return;
     router.push(`/map?tracking=${trackingNumber}`);
   };
+
+  return (
+    <div className="space-y-4 max-w-md mx-auto relative">
+      <Input
+        value={trackingNumber}
+        onChange={(e) => setTrackingNumber(e.target.value)}
+        placeholder="Enter tracking number"
+        className="h-14 text-base bg-white/80 backdrop-blur-sm border-slate-200 focus:border-slate-400 text-slate-800 placeholder:text-slate-400 shadow-sm rounded-xl transition-all cursor-none"
+      />
+      <Button onClick={() => handleTrack()}>Track on Map</Button>
+    </div>
+  );
+}
+
+export default function Home() {
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [isSyncing, setIsSyncing] = useState(false);
+  const router = useRouter();
+  const MemoizedDottedMap = memo(DottedMap);
+
+  const handleRefreshData = async () => {
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    const toastId = toast.loading("Syncing balloon data from WindBorne API...");
+
+    try {
+      const response = await fetch("/api/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(`Data synced! ${data.totalRecords} records processed`, {
+          id: toastId,
+        });
+      } else {
+        toast.error(data.error || "Failed to sync data", {
+          id: toastId,
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to sync data. Please try again.", {
+        id: toastId,
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const updatedLinks = [
+    ...links,
+    {
+      title: "Refresh Data",
+      icon: (
+        <RotateCw className={`h-full w-full text-neutral-500 dark:text-neutral-300 ${isSyncing ? 'animate-spin' : ''}`} />
+      ),
+      onClick: handleRefreshData,
+    },
+  ];
 
   return (
     <>
@@ -58,12 +278,12 @@ export default function Home() {
       <div className="min-h-screen relative overflow-hidden">
         {/* Dotted Map Background */}
         <div className="absolute inset-0 -z-10 h-screen w-screen opacity-30 ">
-          <DottedMap dotRadius={0.1} />
+          <MemoizedDottedMap dotRadius={0.1} markers={markers} />
         </div>
 
         <SmoothCursor />
 
-        <FloatingDock mobileClassName="" items={links} />
+        <FloatingDock mobileClassName="" items={updatedLinks} />
 
         {/* Animated gradient orbs in background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -105,23 +325,6 @@ export default function Home() {
               transition={{ duration: 0.8 }}
             >
               <div className="space-y-6">
-                {/* <motion.div
-                  className="flex items-center gap-3"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <h2 className="text-2xl font-bold bg-gradient-to-br from-slate-900 via-slate-800 to-slate-600 bg-clip-text text-transparent">
-                    AtmosFault
-                  </h2>
-                  <div className="flex items-center gap-2 px-3 py-1 bg-red-50 border border-red-100 rounded-full">
-                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-xs font-medium text-red-700">
-                      Live
-                    </span>
-                  </div>
-                </motion.div> */}
-
                 {/* Hero Text with LAND AIR OCEAN */}
                 <div className="-space-x-4">
                   <motion.div
@@ -206,50 +409,7 @@ export default function Home() {
                   </motion.div>
 
                   <TextAnimate
-                    variants={{
-                      hidden: {
-                        opacity: 0,
-                        y: 30,
-                        rotate: 45,
-                        scale: 0.5,
-                      },
-                      show: (i) => ({
-                        opacity: 1,
-                        y: 0,
-                        rotate: 0,
-                        scale: 1,
-                        transition: {
-                          delay: i * 0.1,
-                          duration: 0.4,
-                          y: {
-                            type: "spring",
-                            damping: 12,
-                            stiffness: 200,
-                            mass: 0.8,
-                          },
-                          rotate: {
-                            type: "spring",
-                            damping: 8,
-                            stiffness: 150,
-                          },
-                          scale: {
-                            type: "spring",
-                            damping: 10,
-                            stiffness: 300,
-                          },
-                        },
-                      }),
-                      exit: (i) => ({
-                        opacity: 0,
-                        y: 30,
-                        rotate: 45,
-                        scale: 0.5,
-                        transition: {
-                          delay: i * 0.1,
-                          duration: 0.4,
-                        },
-                      }),
-                    }}
+                    variants={textVariants}
                     by="character"
                     className="text-base text-slate-600 max-w-lg mx-auto leading-relaxed pt-4"
                   >
@@ -262,25 +422,18 @@ export default function Home() {
 
               {/* Tracking Input */}
               <motion.div
-                id="track"
                 className="space-y-4 max-w-md mx-auto relative"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
                 <div className="relative">
-                  <Input
-                    placeholder="Enter tracking number"
-                    value={trackingNumber}
-                    onChange={(e) => setTrackingNumber(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleTrack()}
-                    className="h-14 text-base bg-white/80 backdrop-blur-sm border-slate-200 focus:border-slate-400 text-slate-800 placeholder:text-slate-400 shadow-sm rounded-xl transition-all cursor-none"
-                  />
+                  <TrackingInput />
                 </div>
 
-                <Button onClick={handleTrack} className="cursor-none">
+                {/* <Button onClick={handleTrack} className="cursor-none">
                   Track on Map
-                </Button>
+                </Button> */}
 
                 {/* Sample Numbers */}
                 <div className="pt-3">
@@ -307,158 +460,6 @@ export default function Home() {
               </motion.div>
             </motion.div>
           </div>
-
-          {/* Feature Section */}
-          <motion.div
-            id="about"
-            className="mt-32 max-w-6xl mx-auto w-full"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
-                Why AtmosFault?
-              </h2>
-              <TextAnimate
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                    y: 30,
-                    rotate: 45,
-                    scale: 0.5,
-                  },
-                  show: (i) => ({
-                    opacity: 1,
-                    y: 0,
-                    rotate: 0,
-                    scale: 1,
-                    transition: {
-                      delay: i * 0.1,
-                      duration: 0.4,
-                      y: {
-                        type: "spring",
-                        damping: 12,
-                        stiffness: 200,
-                        mass: 0.8,
-                      },
-                      rotate: {
-                        type: "spring",
-                        damping: 8,
-                        stiffness: 150,
-                      },
-                      scale: {
-                        type: "spring",
-                        damping: 10,
-                        stiffness: 300,
-                      },
-                    },
-                  }),
-                  exit: (i) => ({
-                    opacity: 0,
-                    y: 30,
-                    rotate: 45,
-                    scale: 0.5,
-                    transition: {
-                      delay: i * 0.1,
-                      duration: 0.4,
-                    },
-                  }),
-                }}
-                by="character"
-                className="text-sm text-slate-600 max-w-lg mx-auto leading-relaxed pt-4"
-              >
-                The most advanced platform for monitoring atmospheric balloon
-                missions
-              </TextAnimate>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  icon: (
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  ),
-                  title: "Global Coverage",
-                  description:
-                    "Track balloons anywhere on Earth with real-time positioning and satellite integration",
-                },
-                {
-                  icon: (
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                      />
-                    </svg>
-                  ),
-                  title: "Real-time Data",
-                  description:
-                    "Live altitude, velocity, and telemetry updates streamed directly to your dashboard",
-                },
-                {
-                  icon: (
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
-                  ),
-                  title: "Predictive Analytics",
-                  description:
-                    "Advanced trajectory modeling and landing zone predictions using ML algorithms",
-                },
-              ].map((feature, index) => (
-                <motion.div
-                  key={index}
-                  className="group relative bg-white/70 backdrop-blur-sm border border-slate-200/80 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 + index * 0.1 }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-                  <div className="relative space-y-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-50 rounded-xl flex items-center justify-center text-slate-700 group-hover:scale-110 transition-transform">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-xl font-semibold text-slate-800">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
         </div>
       </div>
     </>

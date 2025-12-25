@@ -76,10 +76,8 @@ export function calculateEstimatedDelivery(
 }
 
 export function buildTimeline(snapshots: Balloons[]): TimelineEvent[] {
-  // Sort snapshots by time (oldest first)
-  const sorted = [...snapshots].sort((a, b) =>
-    new Date(a.fetchedAt).getTime() - new Date(b.fetchedAt).getTime()
-  );
+  // Sort snapshots by snapshotHour to show progression over time
+  const sorted = [...snapshots].sort((a, b) => a.snapshotHour - b.snapshotHour);
 
   return sorted.map((snapshot) => {
     const status = determineStatus(snapshot.altitude, new Date(snapshot.fetchedAt));
@@ -93,16 +91,16 @@ export function buildTimeline(snapshots: Balloons[]): TimelineEvent[] {
     let description: string;
     switch (status) {
       case 'pending':
-        description = 'Package received at origin facility';
+        description = `Hour ${snapshot.snapshotHour}: At origin facility`;
         break;
       case 'in_transit':
-        description = `Package in transit - altitude ${snapshot.altitude.toFixed(1)} km`;
+        description = `Hour ${snapshot.snapshotHour}: In transit - altitude ${snapshot.altitude.toFixed(1)} km`;
         break;
       case 'delivered':
-        description = 'Package delivered to destination';
+        description = `Hour ${snapshot.snapshotHour}: Delivered to destination`;
         break;
       case 'failed':
-        description = 'Delivery failed - package lost';
+        description = `Hour ${snapshot.snapshotHour}: Delivery failed`;
         break;
     }
 
@@ -123,21 +121,16 @@ export async function getTrackingInfo(trackingNumber: string): Promise<TrackingR
     return null;
   }
 
-  const { hour, index } = parsed;
+  const { index } = parsed;
 
-  // Query the database
-  // Note: Database column is misspelled as "latitiude" instead of "latitude"
+  // Query the database for ALL snapshots with this arrayIndex across ALL hours
+  // This gives us the complete flight path across different time snapshots
   const snapshots = await db
     .select()
     .from(balloon_snapshots)
-    .where(
-      and(
-        eq(balloon_snapshots.arrayIndex, index),
-        eq(balloon_snapshots.snapshotHour, hour)
-      )
-    )
-    .orderBy(desc(balloon_snapshots.fetchedAt))
-    .limit(10);
+    .where(eq(balloon_snapshots.arrayIndex, index))
+    .orderBy(balloon_snapshots.snapshotHour)
+    .limit(100); // Limit to 100 snapshots for performance
 
   if (snapshots.length === 0) {
     return null;
