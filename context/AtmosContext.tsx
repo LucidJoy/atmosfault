@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useSearchParams } from "next/navigation";
 import type { MapRef } from "react-map-gl/mapbox";
-import type { TrackingResponse } from "@/lib/types";
+import type { TrackingResponse } from "@/lib/types/dhl-tracking";
 
 interface ViewState {
   longitude: number;
@@ -114,13 +114,18 @@ export const AtmosProvider = ({ children }: { children: ReactNode }) => {
 
   // Auto-fly to location when tracking data updates
   useEffect(() => {
-    if (trackingData?.currentLocation && mapRef.current) {
+    if (
+      trackingData?.currentLocation &&
+      trackingData.currentLocation.longitude &&
+      trackingData.currentLocation.latitude &&
+      mapRef.current
+    ) {
       mapRef.current.flyTo({
         center: [
           trackingData.currentLocation.longitude,
           trackingData.currentLocation.latitude,
         ],
-        zoom: 3,
+        zoom: 5,
         duration: 2000,
         essential: true,
       });
