@@ -1,6 +1,7 @@
 import { getShipmentTracking, DHLApiResponse, DHLEvent, DHLShipment } from './dhl';
 import { getCityCoordinates } from './geocoding';
 import { blameTheBalloons } from './blame-engine';
+import { getWeatherAtLocation } from './weather';
 import type { TrackingResponse, PackageStatus, Location, TimelineEvent } from '../types/dhl-tracking';
 
 /**
@@ -25,12 +26,12 @@ function mapDHLStatus(statusCode: string): PackageStatus {
 /**
  * Extract location from DHL event with coordinates
  */
-function extractLocation(event: DHLEvent): Location {
+async function extractLocation(event: DHLEvent): Promise<Location> {
   const city = event.location?.address?.addressLocality || 'Unknown';
   const countryCode = event.location?.address?.countryCode || 'Unknown';
 
-  // Get coordinates for map visualization
-  const coords = getCityCoordinates(city);
+  // Get coordinates for map visualization, passing country code to disambiguate
+  const coords = await getCityCoordinates(city, countryCode !== 'Unknown' ? countryCode : undefined);
 
   return {
     city,
@@ -45,20 +46,22 @@ function extractLocation(event: DHLEvent): Location {
 /**
  * Transform DHL events to timeline events
  */
-function buildTimeline(events: DHLEvent[]): TimelineEvent[] {
+async function buildTimeline(events: DHLEvent[]): Promise<TimelineEvent[]> {
   // DHL events are already in chronological order (oldest first)
-  return events.map((event) => ({
-    status: mapDHLStatus(event.statusCode),
-    timestamp: event.timestamp,
-    location: extractLocation(event),
-    description: event.description,
-  }));
+  return Promise.all(
+    events.map(async (event) => ({
+      status: mapDHLStatus(event.statusCode),
+      timestamp: event.timestamp,
+      location: await extractLocation(event),
+      description: event.description,
+    }))
+  );
 }
 
 /**
  * Get current/latest location from shipment
  */
-function getCurrentLocation(shipment: DHLShipment): Location {
+async function getCurrentLocation(shipment: DHLShipment): Promise<Location> {
   const latestEvent = shipment.events[0]; // DHL returns newest first
   return extractLocation(latestEvent);
 }
@@ -96,7 +99,7 @@ export async function getDHLTrackingInfo(trackingNumber: string): Promise<Tracki
   const response: TrackingResponse = {
     trackingNumber: shipment.id,
     status: mapDHLStatus(shipment.status.statusCode),
-    currentLocation: getCurrentLocation(shipment),
+    currentLocation: await getCurrentLocation(shipment),
     origin: {
       city: shipment.origin.address.addressLocality || 'Unknown',
       country: shipment.origin.address.countryCode || 'Unknown',
@@ -105,7 +108,7 @@ export async function getDHLTrackingInfo(trackingNumber: string): Promise<Tracki
       city: shipment.destination.address.addressLocality || 'Unknown',
       country: shipment.destination.address.countryCode || 'Unknown',
     },
-    timeline: buildTimeline(shipment.events),
+    timeline: await buildTimeline(shipment.events),
     estimatedDelivery: getEstimatedDelivery(shipment),
     metadata: {
       service: shipment.service,
@@ -113,6 +116,24 @@ export async function getDHLTrackingInfo(trackingNumber: string): Promise<Tracki
       totalPieces: shipment.details?.totalNumberOfPieces,
     },
   };
+
+  // ☀️ FETCH WEATHER AT CURRENT LOCATION
+  // Get weather conditions at the package's current location
+  try {
+    if (response.currentLocation.latitude && response.currentLocation.longitude) {
+      const weatherData = await getWeatherAtLocation(
+        response.currentLocation.latitude,
+        response.currentLocation.longitude
+      );
+      if (weatherData) {
+        response.weather = weatherData;
+        console.log(`☀️ Weather: ${weatherData.description} (${weatherData.temperature}°C)`);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch weather data:', error);
+    // Non-critical - continue without weather data
+  }
 
   // 🎈 BLAME THE BALLOONS! 🎈
   // Find WindBorne balloons near the package route and blame them for delays
