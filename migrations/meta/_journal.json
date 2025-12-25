@@ -15,6 +15,13 @@
       "when": 1766127149784,
       "tag": "0001_clean_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766648865937,
+      "tag": "0002_pale_toad",
+      "breakpoints": true
     }
   ]
 }

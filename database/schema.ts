@@ -6,9 +6,25 @@ import {
   uuid,
   index,
   uniqueIndex,
+  varchar,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
-// store raw windborne API data
+// DHL Shipment Tracking Cache
+export const dhl_shipments = pgTable(
+  "dhl_shipments",
+  {
+    trackingNumber: varchar("tracking_number", { length: 100 }).notNull().primaryKey(),
+    data: jsonb("data").notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    updatedAtIdx: index("dhl_updated_at_idx").on(table.updatedAt),
+  })
+);
+
+// Legacy: WindBorne balloon snapshots (deprecated)
 export const balloon_snapshots = pgTable(
   "balloons",
   {

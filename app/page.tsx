@@ -23,8 +23,10 @@ import { TextAnimate } from "@/components/ui/text-animate";
 import { SpinningText } from "@/components/ui/spinning-text";
 import { useAtmos } from "@/context/AtmosContext";
 import { toast } from "sonner";
+import { sampleTracking } from "@/lib/sampleTracking";
+import { markers } from "@/lib/markers";
 
-const links = [
+const baseLinks = [
   {
     title: "Home",
     icon: (
@@ -32,7 +34,6 @@ const links = [
     ),
     href: "#",
   },
-
   {
     title: "Track",
     icon: (
@@ -54,13 +55,6 @@ const links = [
     ),
     href: "https://lucidjoy.vercel.app/",
   },
-  // {
-  //   title: "Resume",
-  //   icon: (
-  //     <FilePenLine className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-  //   ),
-  //   href: "https://drive.google.com/file/d/1v6y4h-x0-5pSba4iXBv6ak1mohCixNcM/view?usp=sharing",
-  // },
   {
     title: "LinkedIn",
     icon: (
@@ -115,84 +109,6 @@ const textVariants = {
   }),
 };
 
-const markers = [
-  {
-    lat: 40.7128,
-    lng: -74.006,
-    size: 0.3,
-  }, // New York
-  {
-    lat: 34.0522,
-    lng: -118.2437,
-    size: 0.3,
-  }, // Los Angeles
-  {
-    lat: 51.5074,
-    lng: -0.1278,
-    size: 0.3,
-  }, // London
-  {
-    lat: -33.8688,
-    lng: 151.2093,
-    size: 0.3,
-  }, // Sydney
-  {
-    lat: 48.8566,
-    lng: 2.3522,
-    size: 0.3,
-  }, // Paris
-  {
-    lat: 35.6762,
-    lng: 139.6503,
-    size: 0.3,
-  }, // Tokyo
-  {
-    lat: 55.7558,
-    lng: 37.6176,
-    size: 0.3,
-  }, // Moscow
-  {
-    lat: 39.9042,
-    lng: 116.4074,
-    size: 0.3,
-  }, // Beijing
-  {
-    lat: 28.6139,
-    lng: 77.209,
-    size: 0.3,
-  }, // New Delhi
-  {
-    lat: -23.5505,
-    lng: -46.6333,
-    size: 0.3,
-  }, // São Paulo
-  {
-    lat: 1.3521,
-    lng: 103.8198,
-    size: 0.3,
-  }, // Singapore
-  {
-    lat: 25.2048,
-    lng: 55.2708,
-    size: 0.3,
-  }, // Dubai
-  {
-    lat: 52.52,
-    lng: 13.405,
-    size: 0.3,
-  }, // Berlin
-  {
-    lat: 19.4326,
-    lng: -99.1332,
-    size: 0.3,
-  }, // Mexico City
-  {
-    lat: -26.2041,
-    lng: 28.0473,
-    size: 0.3,
-  }, // Johannesburg
-];
-
 function TrackingInput() {
   const [trackingNumber, setTrackingNumber] = useState("");
 
@@ -222,11 +138,11 @@ export default function Home() {
   const router = useRouter();
   const MemoizedDottedMap = memo(DottedMap);
 
-  const handleRefreshData = async () => {
+  const handleSyncBalloons = async () => {
     if (isSyncing) return;
 
     setIsSyncing(true);
-    const toastId = toast.loading("Syncing balloon data from WindBorne API...");
+    const toastId = toast.loading("Syncing WindBorne balloon data...");
 
     try {
       const response = await fetch("/api/sync", {
@@ -239,16 +155,19 @@ export default function Home() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(`Data synced! ${data.totalRecords} records processed`, {
-          id: toastId,
-        });
+        toast.success(
+          `Balloons synced! ${data.totalRecords} atmospheric snapshots captured`,
+          {
+            id: toastId,
+          }
+        );
       } else {
-        toast.error(data.error || "Failed to sync data", {
+        toast.error(data.error || "Failed to sync balloon data", {
           id: toastId,
         });
       }
     } catch (error) {
-      toast.error("Failed to sync data. Please try again.", {
+      toast.error("Failed to sync balloon data. Please try again.", {
         id: toastId,
       });
     } finally {
@@ -256,14 +175,18 @@ export default function Home() {
     }
   };
 
-  const updatedLinks = [
-    ...links,
+  const links = [
+    ...baseLinks,
     {
-      title: "Refresh Data",
+      title: "Sync Balloons",
       icon: (
-        <RotateCw className={`h-full w-full text-neutral-500 dark:text-neutral-300 ${isSyncing ? 'animate-spin' : ''}`} />
+        <RotateCw
+          className={`h-full w-full text-neutral-500 dark:text-neutral-300 ${
+            isSyncing ? "animate-spin" : ""
+          }`}
+        />
       ),
-      onClick: handleRefreshData,
+      onClick: handleSyncBalloons,
     },
   ];
 
@@ -283,7 +206,7 @@ export default function Home() {
 
         <SmoothCursor />
 
-        <FloatingDock mobileClassName="" items={updatedLinks} />
+        <FloatingDock mobileClassName="" items={links} />
 
         {/* Animated gradient orbs in background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -413,9 +336,8 @@ export default function Home() {
                     by="character"
                     className="text-base text-slate-600 max-w-lg mx-auto leading-relaxed pt-4"
                   >
-                    Your package travels through all three realms of Earth.
-                    Watch it travel land, soar through air, and drift across
-                    ocean in real-time.
+                    Your package is delayed. The atmosphere is to blame.
+                    WindBorne balloons caught the culprit. We have the receipts.
                   </TextAnimate>
                 </div>
               </div>
@@ -438,23 +360,21 @@ export default function Home() {
                 {/* Sample Numbers */}
                 <div className="pt-3">
                   <p className="text-slate-500 text-xs mb-3 font-medium">
-                    Try sample balloons:
+                    Try sample shipments:
                   </p>
                   <div className="flex flex-wrap gap-2 justify-around">
-                    {["ATM-00000000", "ATM-10000029", "ATM-23000100"].map(
-                      (num) => (
-                        <button
-                          key={num}
-                          onClick={() => {
-                            setTrackingNumber(num);
-                            router.push(`/map?tracking=${num}`);
-                          }}
-                          className="px-3 py-2 bg-white/60 hover:bg-white border border-slate-200 rounded-lg text-slate-600 text-xs transition-all duration-200 hover:border-slate-300 hover:shadow-sm font-mono cursor-none"
-                        >
-                          {num}
-                        </button>
-                      )
-                    )}
+                    {sampleTracking.map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => {
+                          setTrackingNumber(num);
+                          router.push(`/map?tracking=${num}`);
+                        }}
+                        className="px-3 py-2 bg-white/60 hover:bg-white border border-slate-200 rounded-lg text-slate-600 text-xs transition-all duration-200 hover:border-slate-300 hover:shadow-sm font-mono cursor-none"
+                      >
+                        {num}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </motion.div>

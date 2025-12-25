@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getTrackingInfo } from '@/lib/services/tracking';
-import type { TrackingError } from '@/lib/types';
+import { getDHLTrackingInfo } from '@/lib/services/dhl-tracking';
+import type { TrackingError } from '@/lib/types/dhl-tracking';
 
 export async function GET(
   _request: Request,
@@ -10,11 +10,11 @@ export async function GET(
     // Next.js 16: params is async and must be awaited
     const { trackingNumber } = await params;
 
-    const trackingInfo = await getTrackingInfo(trackingNumber);
+    const trackingInfo = await getDHLTrackingInfo(trackingNumber);
 
     if (!trackingInfo) {
       const errorResponse: TrackingError = {
-        error: 'Tracking number not found',
+        error: 'Tracking number not found or DHL API unavailable',
         trackingNumber,
       };
       return NextResponse.json(errorResponse, { status: 404 });

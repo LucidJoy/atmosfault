@@ -11,6 +11,7 @@ import { Loader2, MapPin, Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useAtmos } from "@/context/AtmosContext";
+import { sampleTracking } from "@/lib/sampleTracking";
 
 const TrackDialog = () => {
   const {
@@ -76,7 +77,7 @@ const TrackDialog = () => {
               Try sample balloons:
             </p>
             <div className="flex flex-wrap gap-2 justify-around">
-              {["ATM-00000000", "ATM-10000029", "ATM-23000100"].map((num) => (
+              {sampleTracking.map((num) => (
                 <button
                   key={num}
                   onClick={() => {
