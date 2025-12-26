@@ -13,14 +13,18 @@ import {
 import { motion } from "framer-motion";
 import {
   BadgeInfo,
+  DraftingCompass,
   FilePenLine,
   FolderHeart,
   House,
   Linkedin,
+  RotateCw,
   Truck,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 
-const links = [
+const baseLinks = [
   {
     title: "Home",
     icon: (
@@ -49,19 +53,19 @@ const links = [
     ),
     href: "https://lucidjoy.vercel.app/",
   },
+  // {
+  //   title: "Resume",
+  //   icon: (
+  //     <FilePenLine className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+  //   ),
+  //   href: "https://drive.google.com/file/d/1v6y4h-x0-5pSba4iXBv6ak1mohCixNcM/view?usp=sharing",
+  // },
   {
-    title: "Resume",
+    title: "System Architecture",
     icon: (
-      <FilePenLine className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      <DraftingCompass className="h-full w-full text-neutral-500 dark:text-neutral-300" />
     ),
-    href: "https://drive.google.com/file/d/1v6y4h-x0-5pSba4iXBv6ak1mohCixNcM/view?usp=sharing",
-  },
-  {
-    title: "LinkedIn",
-    icon: (
-      <Linkedin className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-    ),
-    href: "https://www.linkedin.com/in/lucidjoy/",
+    href: "https://drive.google.com/file/d/1ey60B81FDw3Hq6qJRENATfw_GBqqMCre/view?usp=sharing",
   },
 ];
 
@@ -144,6 +148,60 @@ const markers = [
 ];
 
 const About = () => {
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSyncBalloons = async () => {
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    const toastId = toast.loading("Syncing WindBorne balloon data...");
+
+    try {
+      const response = await fetch("/api/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          `Balloons synced! ${data.totalRecords} atmospheric snapshots captured`,
+          {
+            id: toastId,
+          }
+        );
+      } else {
+        toast.error(data.error || "Failed to sync balloon data", {
+          id: toastId,
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to sync balloon data. Please try again.", {
+        id: toastId,
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const links = [
+    ...baseLinks,
+    {
+      title: "Sync Balloons",
+      icon: (
+        <RotateCw
+          className={`h-full w-full text-neutral-500 dark:text-neutral-300 ${
+            isSyncing ? "animate-spin" : ""
+          }`}
+        />
+      ),
+      onClick: handleSyncBalloons,
+    },
+  ];
+
   return (
     <>
       <div className="fixed -bottom-7 right-8 w-32 h-32 z-50">

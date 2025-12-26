@@ -8,6 +8,7 @@ import { FloatingDock } from "@/components/ui/floating-dock";
 import { motion } from "framer-motion";
 import {
   BadgeInfo,
+  DraftingCompass,
   FilePenLine,
   FolderHeart,
   House,
@@ -56,11 +57,11 @@ const baseLinks = [
     href: "https://lucidjoy.vercel.app/",
   },
   {
-    title: "LinkedIn",
+    title: "System Architecture",
     icon: (
-      <Linkedin className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+      <DraftingCompass className="h-full w-full text-neutral-500 dark:text-neutral-300" />
     ),
-    href: "https://www.linkedin.com/in/lucidjoy/",
+    href: "https://drive.google.com/file/d/1ey60B81FDw3Hq6qJRENATfw_GBqqMCre/view?usp=sharing",
   },
 ];
 
@@ -124,7 +125,7 @@ function TrackingInput() {
       <Input
         value={trackingNumber}
         onChange={(e) => setTrackingNumber(e.target.value)}
-        placeholder="Enter tracking number"
+        placeholder="Enter DHL tracking number"
         className="h-14 text-base bg-white/80 backdrop-blur-sm border-slate-200 focus:border-slate-400 text-slate-800 placeholder:text-slate-400 shadow-sm rounded-xl transition-all cursor-none"
       />
       <Button onClick={() => handleTrack()}>Track on Map</Button>

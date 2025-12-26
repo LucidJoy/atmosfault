@@ -1,7 +1,7 @@
-import { db } from '@/database/drizzle';
-import { dhl_shipments } from '@/database/schema';
-import { eq } from 'drizzle-orm';
-import axios from 'axios';
+import { db } from "@/database/drizzle";
+import { dhl_shipments } from "@/database/schema";
+import { eq } from "drizzle-orm";
+import axios from "axios";
 
 /**
  * DHL API Integration with Smart Caching
@@ -13,7 +13,7 @@ import axios from 'axios';
  * 4. Rate Limit Protection: Minimize external API calls
  */
 
-const DHL_API_BASE_URL = 'https://api-eu.dhl.com/track/shipments';
+const DHL_API_BASE_URL = "https://api-eu.dhl.com/track/shipments";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
 
 // DHL API Response Types
@@ -85,25 +85,27 @@ function isCacheValid(updatedAt: Date): boolean {
 /**
  * Fetch shipment data from DHL API
  */
-async function fetchFromDHL(trackingNumber: string): Promise<DHLApiResponse | null> {
+async function fetchFromDHL(
+  trackingNumber: string
+): Promise<DHLApiResponse | null> {
   const apiKey = process.env.DHL_API_KEY;
 
   if (!apiKey) {
-    console.error('DHL_API_KEY not configured');
-    throw new Error('DHL API key not configured');
+    console.error("DHL_API_KEY not configured");
+    throw new Error("DHL API key not configured");
   }
 
   try {
     const response = await axios.get<DHLApiResponse>(DHL_API_BASE_URL, {
       params: {
         trackingNumber,
-        service: 'express',
-        language: 'en',
+        service: "express",
+        language: "en",
         offset: 0,
         limit: 5,
       },
       headers: {
-        'DHL-API-Key': apiKey,
+        "DHL-API-Key": apiKey,
       },
       timeout: 10000, // 10 second timeout
     });
@@ -111,13 +113,13 @@ async function fetchFromDHL(trackingNumber: string): Promise<DHLApiResponse | nu
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error('DHL API Error:', {
+      console.error("DHL API Error:", {
         status: error.response?.status,
         message: error.message,
         trackingNumber,
       });
     } else {
-      console.error('Unexpected error fetching from DHL:', error);
+      console.error("Unexpected error fetching from DHL:", error);
     }
     return null;
   }
@@ -126,7 +128,9 @@ async function fetchFromDHL(trackingNumber: string): Promise<DHLApiResponse | nu
 /**
  * Get cached shipment data from database
  */
-async function getCachedShipment(trackingNumber: string): Promise<DHLApiResponse | null> {
+async function getCachedShipment(
+  trackingNumber: string
+): Promise<DHLApiResponse | null> {
   try {
     const cached = await db
       .select()
@@ -142,14 +146,18 @@ async function getCachedShipment(trackingNumber: string): Promise<DHLApiResponse
 
     // Check if cache is still valid
     if (isCacheValid(updatedAt)) {
-      console.log(`✓ Cache hit for ${trackingNumber} (age: ${Math.floor((Date.now() - new Date(updatedAt).getTime()) / 1000)}s)`);
+      console.log(
+        `✓ Cache hit for ${trackingNumber} (age: ${Math.floor(
+          (Date.now() - new Date(updatedAt).getTime()) / 1000
+        )}s)`
+      );
       return data as DHLApiResponse;
     }
 
     console.log(`✗ Cache expired for ${trackingNumber}`);
     return null;
   } catch (error) {
-    console.error('Error reading from cache:', error);
+    console.error("Error reading from cache:", error);
     return null;
   }
 }
@@ -157,7 +165,10 @@ async function getCachedShipment(trackingNumber: string): Promise<DHLApiResponse
 /**
  * Save shipment data to cache
  */
-async function saveToCache(trackingNumber: string, data: DHLApiResponse): Promise<void> {
+async function saveToCache(
+  trackingNumber: string,
+  data: DHLApiResponse
+): Promise<void> {
   try {
     await db
       .insert(dhl_shipments)
@@ -176,7 +187,7 @@ async function saveToCache(trackingNumber: string, data: DHLApiResponse): Promis
 
     console.log(`✓ Cached shipment ${trackingNumber}`);
   } catch (error) {
-    console.error('Error saving to cache:', error);
+    console.error("Error saving to cache:", error);
     // Non-critical error - continue without caching
   }
 }
@@ -191,7 +202,9 @@ async function saveToCache(trackingNumber: string, data: DHLApiResponse): Promis
  * 4. Save fresh data to cache
  * 5. Return fresh data
  */
-export async function getShipmentTracking(trackingNumber: string): Promise<DHLApiResponse | null> {
+export async function getShipmentTracking(
+  trackingNumber: string
+): Promise<DHLApiResponse | null> {
   // Step 1: Try cache first
   const cached = await getCachedShipment(trackingNumber);
   if (cached) {
@@ -215,17 +228,19 @@ export async function getShipmentTracking(trackingNumber: string): Promise<DHLAp
 /**
  * Clean up old cache entries (optional maintenance function)
  */
-export async function cleanupOldCache(olderThanDays: number = 7): Promise<void> {
+export async function cleanupOldCache(
+  olderThanDays: number = 7
+): Promise<void> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 
   try {
-    const result = await db
+    await db
       .delete(dhl_shipments)
       .where(eq(dhl_shipments.updatedAt, cutoffDate));
 
     console.log(`Cleaned up cache entries older than ${olderThanDays} days`);
   } catch (error) {
-    console.error('Error cleaning up cache:', error);
+    console.error("Error cleaning up cache:", error);
   }
 }
