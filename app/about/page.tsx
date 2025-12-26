@@ -293,9 +293,9 @@ const About = () => {
                     />
                   </svg>
                 ),
-                title: "Predictive Analytics",
+                title: "Atmospheric Blame Engine",
                 description:
-                  "Advanced trajectory modeling and landing zone predictions using ML algorithms",
+                  "Correlate shipping delays with atmospheric conditions using spatial data fusion",
               },
             ].map((feature, index) => (
               <motion.div
