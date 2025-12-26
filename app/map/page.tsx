@@ -22,6 +22,7 @@ import {
   Skull,
   Wind,
   RotateCw,
+  DraftingCompass,
 } from "lucide-react";
 import { AtmosProvider, useAtmos } from "@/context/AtmosContext";
 import { getWeatherEmoji } from "@/lib/services/weather";
@@ -159,19 +160,12 @@ function MapPageContent() {
       ),
       href: "https://lucidjoy.vercel.app/",
     },
-    // {
-    //   title: "Resume",
-    //   icon: (
-    //     <FilePenLine className="h-full w-full text-neutral-500 dark:text-neutral-300" />
-    //   ),
-    //   href: "https://drive.google.com/file/d/1v6y4h-x0-5pSba4iXBv6ak1mohCixNcM/view?usp=sharing",
-    // },
     {
-      title: "LinkedIn",
+      title: "System Architecture",
       icon: (
-        <Linkedin className="h-full w-full text-neutral-500 dark:text-neutral-300" />
+        <DraftingCompass className="h-full w-full text-neutral-500 dark:text-neutral-300" />
       ),
-      href: "https://www.linkedin.com/in/lucidjoy/",
+      href: "https://drive.google.com/file/d/1ey60B81FDw3Hq6qJRENATfw_GBqqMCre/view?usp=sharing",
     },
   ];
 
@@ -475,18 +469,23 @@ function MapPageContent() {
                   </div>
                   <div className="bg-gradient-to-br from-sky-50 to-cyan-50 border border-cyan-200 rounded-lg p-4 space-y-3 hover:from-sky-100 hover:to-cyan-100 transition-all">
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl">{getWeatherEmoji(trackingData.weather.icon)}</span>
+                      <span className="text-3xl">
+                        {getWeatherEmoji(trackingData.weather.icon)}
+                      </span>
                       <div className="text-right">
                         <p className="text-lg font-bold text-slate-800">
                           {trackingData.weather.temperature.toFixed(1)}°C
                         </p>
                         <p className="text-xs text-slate-600 capitalize">
-                          Feels like {trackingData.weather.feelsLike.toFixed(1)}°C
+                          Feels like {trackingData.weather.feelsLike.toFixed(1)}
+                          °C
                         </p>
                       </div>
                     </div>
                     <div className="text-sm text-slate-700 capitalize border-t border-cyan-200 pt-3">
-                      <p className="font-medium">{trackingData.weather.description}</p>
+                      <p className="font-medium">
+                        {trackingData.weather.description}
+                      </p>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="bg-white/50 rounded px-2 py-1.5">

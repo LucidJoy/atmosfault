@@ -14,6 +14,8 @@ import {
 import { useSearchParams } from "next/navigation";
 import type { MapRef } from "react-map-gl/mapbox";
 import type { TrackingResponse } from "@/lib/types/dhl-tracking";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 interface ViewState {
   longitude: number;
@@ -103,6 +105,11 @@ export const AtmosProvider = ({ children }: { children: ReactNode }) => {
     fetchTrackingData(trackingNumber);
     setTrackDialogOpen(false);
   };
+
+  const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(10, "10 s"),
+  });
 
   // Auto-fetch on mount if tracking param exists
   useEffect(() => {

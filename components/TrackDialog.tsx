@@ -43,7 +43,7 @@ const TrackDialog = () => {
               <MapPin className="w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors duration-300" />
             </div>
             <Input
-              placeholder="Enter tracking number (e.g., ATM-10000029)"
+              placeholder="Enter DHL tracking number"
               value={trackingNumber}
               onChange={(e) => setTrackingNumber(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleTrack()}
