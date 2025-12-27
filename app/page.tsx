@@ -335,7 +335,7 @@ export default function Home() {
                   <TextAnimate
                     variants={textVariants}
                     by="character"
-                    className="text-base text-slate-600 max-w-lg mx-auto leading-relaxed pt-4"
+                    className="text-base text-slate-600 max-w-[550px] mx-auto leading-relaxed pt-4"
                   >
                     Your package is delayed. The atmosphere is to blame.
                     WindBorne balloons caught the culprit. We have the receipts.
