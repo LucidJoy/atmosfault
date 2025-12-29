@@ -17,15 +17,14 @@ import {
   FolderHeart,
   FilePenLine,
   Linkedin,
-  AlertTriangle,
-  Zap,
-  Skull,
   Wind,
   RotateCw,
   DraftingCompass,
+  ChevronRight,
 } from "lucide-react";
 import { AtmosProvider, useAtmos } from "@/context/AtmosContext";
 import { getWeatherEmoji } from "@/lib/services/weather";
+import { LightRays } from "@/components/ui/light-rays";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { toast } from "sonner";
 
@@ -46,40 +45,6 @@ const getThreatLevelColor = (level: string): string => {
       return "#7c2d12"; // dark red
     default:
       return "#6b7280"; // gray
-  }
-};
-
-const getThreatLevelBadge = (level: string): string => {
-  switch (level) {
-    case "PEACEFUL":
-      return "bg-green-500";
-    case "TURBULENT":
-      return "bg-yellow-500";
-    case "CHAOTIC":
-      return "bg-orange-500";
-    case "APOCALYPTIC":
-      return "bg-red-500";
-    case "DOOMED":
-      return "bg-red-900";
-    default:
-      return "bg-gray-500";
-  }
-};
-
-const getThreatIcon = (level: string) => {
-  switch (level) {
-    case "PEACEFUL":
-      return null;
-    case "TURBULENT":
-      return <Wind className="w-4 h-4" />;
-    case "CHAOTIC":
-      return <AlertTriangle className="w-4 h-4" />;
-    case "APOCALYPTIC":
-      return <Zap className="w-4 h-4" />;
-    case "DOOMED":
-      return <Skull className="w-4 h-4" />;
-    default:
-      return null;
   }
 };
 
@@ -527,63 +492,86 @@ function MapPageContent() {
               {trackingData.blame &&
                 trackingData.blame.culpritBalloons.length > 0 && (
                   <div
-                    className="space-y-3 animate-fadeIn border-2 border-red-500 rounded-lg p-4"
-                    style={{ animationDelay: "175ms" }}
+                    className="relative overflow-hidden rounded-lg p-6 animate-fadeIn"
+                    style={{
+                      animationDelay: "175ms",
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,248,255,0.95) 100%)",
+                      border: "1px solid rgba(100, 100, 100, 0.1)",
+                    }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-red-700">
-                        {getThreatIcon(trackingData.blame.overallThreat)}
-                        <h3 className="text-sm font-bold">
-                          ATMOSPHERIC BLAME DETECTED
-                        </h3>
+                    <LightRays
+                      count={4}
+                      color="rgba(255, 100, 100, 0.15)"
+                      blur={40}
+                      speed={12}
+                      length="100%"
+                    />
+
+                    {/* Header */}
+                    <div className="relative z-10 mb-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                            Atmospheric
+                            <br />
+                            Interference
+                          </h3>
+                        </div>
+                        <div
+                          className="text-right"
+                          style={{
+                            color: getThreatLevelColor(
+                              trackingData.blame.overallThreat
+                            ),
+                          }}
+                        >
+                          <p className="text-3xl font-bold">
+                            {trackingData.blame.doomLevel}
+                          </p>
+                          <p className="text-xs font-semibold uppercase tracking-wide mt-1">
+                            Severity
+                          </p>
+                        </div>
                       </div>
-                      <Badge
-                        className={`${getThreatLevelBadge(
-                          trackingData.blame.overallThreat
-                        )} text-xs font-bold`}
-                      >
-                        {trackingData.blame.overallThreat}
-                      </Badge>
                     </div>
 
-                    {/* Doom Meter */}
-                    <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold text-red-900">
-                          DOOM LEVEL
-                        </span>
-                        <span className="text-lg font-bold text-red-600">
-                          {trackingData.blame.doomLevel}/100
-                        </span>
-                      </div>
-                      <div className="w-full bg-red-100 rounded-full h-3 overflow-hidden">
+                    {/* Visual Threat Indicator */}
+                    <div className="relative z-10 mb-6">
+                      <div className="relative h-1.5 bg-slate-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-orange-500 to-red-600 transition-all duration-1000 animate-pulse"
-                          style={{ width: `${trackingData.blame.doomLevel}%` }}
+                          className="h-full transition-all duration-1000"
+                          style={{
+                            width: `${trackingData.blame.doomLevel}%`,
+                            background: `linear-gradient(90deg, ${getThreatLevelColor(
+                              trackingData.blame.overallThreat
+                            )}, ${getThreatLevelColor(
+                              trackingData.blame.overallThreat
+                            )}cc)`,
+                          }}
                         />
                       </div>
                     </div>
 
-                    {/* Top Culprit */}
+                    {/* Primary Culprit - Minimal */}
                     {trackingData.blame.culpritBalloons[0] && (
-                      <div className="bg-red-900/10 border border-red-300 rounded-lg p-3">
-                        <p
-                          className="text-xs font-bold text-red-900 mb-2"
-                          onClick={() => console.log(trackingData)}
-                        >
-                          🎈 PRIMARY CULPRIT
+                      <div className="relative z-10 mb-6 pb-6 border-b border-slate-200">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                          Primary Culprit
                         </p>
-                        <p className="text-xs text-red-800 mb-1 font-mono">
-                          {trackingData.blame.culpritBalloons[0].balloonId}
-                        </p>
-                        <p className="text-xs text-red-700 leading-tight mb-2">
+                        <p className="text-sm font-medium text-slate-900 mb-3 leading-snug">
                           {trackingData.blame.culpritBalloons[0].dramaticReason}
                         </p>
-                        <details className="text-xs">
-                          <summary className="cursor-pointer text-blue-600 hover:text-blue-800 font-medium">
-                            Scientific explanation
+                        <p className="text-xs text-slate-500 font-mono mb-3">
+                          {trackingData.blame.culpritBalloons[0].balloonId}
+                        </p>
+
+                        <details className="group text-xs">
+                          <summary className="cursor-pointer text-slate-600 hover:text-slate-900 flex items-center gap-2 font-medium transition-colors w-fit p-2 pr-3 bg-black/10 rounded">
+                            <ChevronRight className="w-3 h-3 group-open:rotate-90 transition-transform" />
+                            Scientific Details
                           </summary>
-                          <p className="text-slate-600 mt-2 leading-tight">
+                          <p className="text-slate-600 mt-3 pl-5 leading-relaxed text-xs">
                             {
                               trackingData.blame.culpritBalloons[0]
                                 .scientificReason
@@ -593,20 +581,27 @@ function MapPageContent() {
                       </div>
                     )}
 
-                    {/* Additional Culprits Count */}
                     {trackingData.blame.culpritBalloons.length > 1 && (
-                      <p className="text-xs text-center text-slate-600 font-medium">
-                        + {trackingData.blame.culpritBalloons.length - 1} more
-                        atmospheric accomplices detected
-                      </p>
+                      <div className="relative z-10 mb-6 pb-6 border-b border-slate-200">
+                        <p className="text-xs text-slate-600">
+                          <span className="font-semibold text-slate-900">
+                            {trackingData.blame.culpritBalloons.length - 1}
+                          </span>{" "}
+                          additional atmospheric anomal
+                          {trackingData.blame.culpritBalloons.length - 1 === 1
+                            ? "y"
+                            : "ies"}{" "}
+                          detected
+                        </p>
+                      </div>
                     )}
 
-                    {/* Alternate Timeline */}
-                    <details className="bg-slate-50 border border-slate-300 rounded-lg p-3">
-                      <summary className="cursor-pointer text-xs font-bold text-slate-700">
-                        📊 Alternate Timeline (Without Balloon Data)
+                    <details className="group relative z-10 text-xs">
+                      <summary className="cursor-pointer text-slate-700 hover:text-slate-900 flex items-center gap-2 font-medium transition-colors w-fit p-2 pr-3 bg-black/10 rounded">
+                        <ChevronRight className="w-3 h-3 group-open:rotate-90 transition-transform" />
+                        Without Balloon Data
                       </summary>
-                      <p className="text-xs text-slate-600 mt-2 leading-relaxed italic">
+                      <p className="text-slate-600 mt-3 pl-5 leading-relaxed italic">
                         {trackingData.blame.alternateTimeline}
                       </p>
                     </details>
